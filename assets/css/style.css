@@ -1,0 +1,33 @@
+/* sga_atleticas/assets/css/style.css */
+
+/* Garante que o footer fique na parte de baixo em páginas com pouco conteúdo */
+main.container {
+    min-height: 75vh;
+}
+
+/* Efeito de elevação nos cards dos dashboards ao passar o mouse */
+.card {
+    transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+}
+
+/* Melhora a aparência das abas (tabs) na tela de login */
+.nav-tabs .nav-link {
+    color: #495057; /* Um cinza padrão para a aba inativa */
+}
+
+.nav-tabs .nav-link.active {
+    color: #000;
+    font-weight: bold;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+
+/* Ajuste para o accordion de gerenciamento de equipes */
+.accordion-button:not(.collapsed) {
+    color: #0d6efd; /* Azul do Bootstrap */
+    background-color: #e7f1ff; /* Um azul bem claro */
+}
