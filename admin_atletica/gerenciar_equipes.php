@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['criar_equipe'])) {
     }
 }
 
-// Ação: Alocar aluno em equipe
+// Ação: Alocar usuario em equipe
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['alocar_aluno'])) {
     $equipe_id = $_POST['equipe_id'];
     $aluno_id = $_POST['aluno_id'];
@@ -132,7 +132,7 @@ $modalidades = $conexao->query($sql_modalidades);
                                                 }
                                                 echo "</ul>";
                                             } else {
-                                                echo "<p class='text-muted'>Nenhum aluno alocado.</p>";
+                                                echo "<p class='text-muted'>Nenhum usuario alocado.</p>";
                                             }
                                         }
                                     } else {

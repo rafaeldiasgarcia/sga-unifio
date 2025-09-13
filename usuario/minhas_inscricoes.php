@@ -4,7 +4,7 @@ is_aluno();
 
 $aluno_id = $_SESSION['id'];
 
-// Buscar inscrições e equipes do aluno
+// Buscar inscrições e equipes do usuario
 $sql = "SELECT 
             m.nome as modalidade_nome, 
             i.status,

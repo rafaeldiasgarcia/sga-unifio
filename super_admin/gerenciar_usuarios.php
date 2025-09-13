@@ -2,8 +2,8 @@
 require_once '../config.php';
 is_superadmin();
 
-// Buscar todos os usuários, exceto o próprio super admin logado
-$sql = "SELECT id, nome, email, role, tipo_usuario_detalhado 
+// ATUALIZADO: Busca também a flag 'is_coordenador'
+$sql = "SELECT id, nome, email, role, tipo_usuario_detalhado, is_coordenador 
         FROM usuarios 
         WHERE id != ? 
         ORDER BY nome ASC";
@@ -17,6 +17,10 @@ $usuarios = $stmt->get_result();
     <h2>Gerenciar Todos os Usuários</h2>
     <p>Visualize e edite as informações de qualquer usuário cadastrado no sistema.</p>
 
+<?php if (isset($_GET['status']) && $_GET['status'] == 'deleted'): ?>
+    <div class="alert alert-success">Usuário excluído com sucesso!</div>
+<?php endif; ?>
+
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
@@ -28,7 +32,15 @@ $usuarios = $stmt->get_result();
                             <td><?php echo htmlspecialchars($user['nome']); ?></td>
                             <td><?php echo htmlspecialchars($user['email']); ?></td>
                             <td><?php echo ucfirst($user['role']); ?></td>
-                            <td><?php echo htmlspecialchars($user['tipo_usuario_detalhado'] ?? 'N/A'); ?></td>
+                            <td>
+                                <?php
+                                echo htmlspecialchars($user['tipo_usuario_detalhado'] ?? 'N/A');
+                                // NOVO: Adiciona a tag de Coordenador
+                                if ($user['is_coordenador']) {
+                                    echo " <span class='badge bg-primary'>Coordenador</span>";
+                                }
+                                ?>
+                            </td>
                             <td>
                                 <a href="editar_usuario.php?id=<?php echo $user['id']; ?>" class="btn btn-sm btn-primary">Editar</a>
                             </td>

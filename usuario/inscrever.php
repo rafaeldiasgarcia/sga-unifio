@@ -5,7 +5,7 @@ is_aluno();
 $aluno_id = $_SESSION['id'];
 $mensagem = '';
 
-// Buscar a atlética do aluno para garantir que ele possa se inscrever
+// Buscar a atlética do usuario para garantir que ele possa se inscrever
 $sql_atletica = "SELECT c.atletica_id FROM usuarios u JOIN cursos c ON u.curso_id = c.id WHERE u.id = ?";
 $stmt_atletica = $conexao->prepare($sql_atletica);
 $stmt_atletica->bind_param("i", $aluno_id);
@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['modalidade_id'])) {
 }
 
 // --- MUDANÇA PRINCIPAL AQUI ---
-// Buscar modalidades do evento ativo E o status de inscrição do aluno para cada uma
+// Buscar modalidades do evento ativo E o status de inscrição do usuario para cada uma
 $sql_modalidades = "SELECT 
                         m.id, 
                         m.nome,

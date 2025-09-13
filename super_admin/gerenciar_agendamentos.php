@@ -9,24 +9,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['agendamento_id'])) {
     $acao = $_POST['acao'];
 
     if ($acao == 'aprovar') {
-        $novo_status = 'aprovado';
-        $sql = "UPDATE agendamentos SET status = ? WHERE id = ?";
-        $stmt = $conexao->prepare($sql);
-        $stmt->bind_param("si", $novo_status, $agendamento_id);
+        // 1. VERIFICAÇÃO DE CONFLITO: Busca a data e o período do evento que se quer aprovar
+        $stmt_check = $conexao->prepare("SELECT data_agendamento, periodo FROM agendamentos WHERE id = ?");
+        $stmt_check->bind_param("i", $agendamento_id);
+        $stmt_check->execute();
+        $evento_para_aprovar = $stmt_check->get_result()->fetch_assoc();
+
+        // 2. Procura por outros eventos JÁ APROVADOS na mesma data e período
+        $stmt_conflict = $conexao->prepare("SELECT id FROM agendamentos WHERE data_agendamento = ? AND periodo = ? AND status = 'aprovado'");
+        $stmt_conflict->bind_param("ss", $evento_para_aprovar['data_agendamento'], $evento_para_aprovar['periodo']);
+        $stmt_conflict->execute();
+
+        // 3. Se encontrar algum conflito, exibe o erro. Senão, aprova.
+        if ($stmt_conflict->get_result()->num_rows > 0) {
+            $mensagem = "<div class='alert alert-danger'><strong>Falha na Aprovação!</strong> Já existe um evento aprovado para esta data e período.</div>";
+        } else {
+            $sql = "UPDATE agendamentos SET status = 'aprovado', motivo_rejeicao = NULL WHERE id = ?";
+            $stmt = $conexao->prepare($sql);
+            $stmt->bind_param("i", $agendamento_id);
+            if ($stmt->execute()) {
+                $mensagem = "<div class='alert alert-success'>Agendamento aprovado com sucesso!</div>";
+            }
+        }
     } elseif ($acao == 'rejeitar') {
         $novo_status = 'rejeitado';
         $motivo = trim($_POST['motivo_rejeicao']);
-        $sql = "UPDATE agendamentos SET status = ?, motivo_rejeicao = ? WHERE id = ?";
-        $stmt = $conexao->prepare($sql);
-        $stmt->bind_param("ssi", $novo_status, $motivo, $agendamento_id);
-    }
-
-    if (isset($stmt) && $stmt->execute()) {
-        $mensagem = "<div class='alert alert-success'>Status do agendamento atualizado.</div>";
+        if (!empty($motivo)) {
+            $sql = "UPDATE agendamentos SET status = ?, motivo_rejeicao = ? WHERE id = ?";
+            $stmt = $conexao->prepare($sql);
+            $stmt->bind_param("ssi", $novo_status, $motivo, $agendamento_id);
+            if ($stmt->execute()) {
+                $mensagem = "<div class='alert alert-warning'>Agendamento rejeitado com sucesso.</div>";
+            }
+        } else {
+            $mensagem = "<div class='alert alert-danger'>O motivo da rejeição é obrigatório.</div>";
+        }
     }
 }
 
-// Buscar agendamentos pendentes
+// Buscar agendamentos pendentes para exibir na tabela
 $sql_pendentes = "SELECT a.id, a.titulo, a.data_agendamento, a.periodo, u.nome as solicitante
                   FROM agendamentos a JOIN usuarios u ON a.usuario_id = u.id
                   WHERE a.status = 'pendente' ORDER BY a.data_solicitacao ASC";
@@ -76,8 +97,8 @@ $pendentes = $conexao->query($sql_pendentes);
                                                         <p>Você está rejeitando o evento: <strong><?php echo htmlspecialchars($req['titulo']); ?></strong></p>
                                                         <input type="hidden" name="agendamento_id" value="<?php echo $req['id']; ?>">
                                                         <div class="mb-3">
-                                                            <label for="motivo_rejeicao" class="form-label">Motivo da Rejeição (Obrigatório)</label>
-                                                            <textarea name="motivo_rejeicao" class="form-control" rows="3" required></textarea>
+                                                            <label for="motivo_rejeicao_<?php echo $req['id']; ?>" class="form-label">Motivo da Rejeição (Obrigatório)</label>
+                                                            <textarea name="motivo_rejeicao" id="motivo_rejeicao_<?php echo $req['id']; ?>" class="form-control" rows="3" required></textarea>
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">

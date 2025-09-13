@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="/sga/assets/css/style.css">
 </head>
 <body>
-
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container">
         <a class="navbar-brand" href="/sga/index.php"><strong>SGA UNIFIO</strong></a>
@@ -20,19 +19,26 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
-                    <li class="nav-item"><a class="nav-link" href="/sga/agenda.php">Agenda da Quadra</a></li>
 
-                    <?php if ($_SESSION["role"] == 'aluno'): ?>
-                        <li class="nav-item"><a class="nav-link" href="/sga/aluno/dashboard.php">Painel do Aluno</a></li>
-                    <?php elseif ($_SESSION["role"] == 'admin'): ?>
+                    <li class="nav-item"><a class="nav-link" href="/sga/pages/agenda.php">Agenda da Quadra</a></li>
+
+                    <?php if ($_SESSION["role"] != 'superadmin'): ?>
+                        <li class="nav-item"><a class="nav-link" href="/sga/usuario/dashboard.php">Painel do Usuário</a></li>
+                    <?php endif; ?>
+
+                    <?php if ($_SESSION["role"] == 'admin'): ?>
                         <li class="nav-item"><a class="nav-link" href="/sga/admin_atletica/dashboard.php">Painel Admin</a></li>
                     <?php elseif ($_SESSION["role"] == 'superadmin'): ?>
                         <li class="nav-item"><a class="nav-link" href="/sga/super_admin/dashboard.php">Painel Super Admin</a></li>
                     <?php endif; ?>
 
                     <?php if (isset($_SESSION['tipo_usuario_detalhado']) && $_SESSION['tipo_usuario_detalhado'] == 'Professor'): ?>
-                        <li class="nav-item"><a class="nav-link" href="/sga/agendar_evento.php">Agendar Evento</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/sga/meus_agendamentos.php">Meus Agendamentos</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/sga/pages/agendar_evento.php">Agendar Evento</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/sga/pages/meus_agendamentos.php">Meus Agendamentos</a></li>
+                    <?php endif; ?>
+
+                    <?php if (isset($_SESSION['tipo_usuario_detalhado']) && $_SESSION['tipo_usuario_detalhado'] == 'Membro das Atléticas'): ?>
+                        <li class="nav-item"><a class="nav-link" href="/sga/usuario/ver_atletica.php">Ver Atlética</a></li>
                     <?php endif; ?>
 
                     <li class="nav-item dropdown">
@@ -40,7 +46,7 @@
                             <i class="bi bi-person-circle"></i> Olá, <?php echo htmlspecialchars($_SESSION["nome"]); ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/sga/perfil.php">Editar Perfil</a></li>
+                            <li><a class="dropdown-item" href="/sga/pages/perfil.php">Editar Perfil</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/sga/logout.php">Sair</a></li>
                         </ul>
@@ -53,5 +59,4 @@
         </div>
     </div>
 </nav>
-
 <main class="container mt-4">

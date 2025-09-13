@@ -8,20 +8,13 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
 
 // Redireciona para o dashboard correto baseado no perfil
 $role = $_SESSION["role"];
-switch ($role) {
-    case 'aluno':
-        header("location: aluno/dashboard.php");
-        break;
-    case 'admin':
-        header("location: admin_atletica/dashboard.php");
-        break;
-    case 'superadmin':
-        header("location: super_admin/dashboard.php");
-        break;
-    default:
-        // Se por algum motivo não tiver perfil, desloga
-        header("location: logout.php");
-        break;
+
+if ($role == 'superadmin') {
+    // O Super Admin tem um painel único e vai direto para ele.
+    header("location: super_admin/dashboard.php");
+} else {
+    // TODOS os outros perfis (usuario, admin) vão para o painel de usuário como página inicial.
+    header("location: usuario/dashboard.php");
 }
 exit;
 ?>

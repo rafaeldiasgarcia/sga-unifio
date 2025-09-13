@@ -58,36 +58,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <?php include 'templates/header.php'; ?>
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
+    <div class="row justify-content-center"><div class="col-md-5">
+            <div class="card shadow-sm"><div class="card-body p-4">
                     <h2 class="text-center mb-4">Login</h2>
-
-                    <?php if (isset($_GET['registro']) && $_GET['registro'] == 'sucesso'): ?>
-                        <div class="alert alert-success">Cadastro realizado com sucesso! Faça seu login.</div>
-                    <?php endif; ?>
-
+                    <?php if (isset($_GET['registro']) && $_GET['registro'] == 'sucesso') echo "<div class='alert alert-success'>Cadastro realizado com sucesso! Faça seu login.</div>"; ?>
                     <?php if ($erro) echo "<div class='alert alert-danger'>$erro</div>"; ?>
-
                     <form action="login.php" method="post">
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control" required>
+                        <div class="mb-3"><label for="email" class="form-label">Email</label><input type="email" name="email" class="form-control" required></div>
+                        <div class="mb-3"><label for="senha" class="form-label">Senha</label><input type="password" name="senha" class="form-control" required></div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <a href="esqueci_senha.php">Esqueci a senha</a>
                         </div>
-                        <div class="mb-3">
-                            <label for="senha" class="form-label">Senha</label>
-                            <input type="password" name="senha" class="form-control" required>
-                        </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Entrar</button>
-                        </div>
-                        <p class="mt-3 text-center">
-                            Não possui uma conta? <a href="registro.php">Cadastre-se</a>
-                        </p>
+                        <div class="d-grid"><button type="submit" class="btn btn-primary">Entrar</button></div>
+                        <p class="mt-3 text-center">Não possui uma conta? <a href="registro.php">Cadastre-se</a></p>
                     </form>
-                </div>
-            </div>
-        </div>
-    </div>
+                </div></div>
+        </div></div>
 <?php include 'templates/footer.php'; ?>

@@ -26,7 +26,7 @@ function check_login() {
 
 function is_aluno() {
     check_login();
-    if ($_SESSION["role"] !== 'aluno') {
+    if ($_SESSION["role"] !== 'usuario') {
         die("Acesso negado. Área restrita para Alunos.");
     }
 }

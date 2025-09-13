@@ -10,18 +10,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['aluno_id'])) {
     $acao = $_POST['acao'];
 
     if ($acao == 'aprovar') {
-        // Promove o usuário para "Membro" e limpa o status da solicitação
-        $sql = "UPDATE usuarios SET tipo_usuario_detalhado = 'Membro das Atléticas', atletica_join_status = 'none' WHERE id = ?";
+        // ATUALIZADO: Agora também define o atletica_id do usuário
+        $sql = "UPDATE usuarios SET tipo_usuario_detalhado = 'Membro das Atléticas', atletica_join_status = 'none', atletica_id = ? WHERE id = ?";
+        $stmt = $conexao->prepare($sql);
+        $stmt->bind_param("ii", $atletica_id, $aluno_id);
         $mensagem = "<div class='alert alert-success'>Aluno aprovado e adicionado à atlética!</div>";
     } elseif ($acao == 'recusar') {
-        // Apenas limpa o status da solicitação, permitindo que o aluno peça novamente no futuro
+        // Apenas limpa o status da solicitação, permitindo que o usuario peça novamente no futuro
         $sql = "UPDATE usuarios SET atletica_join_status = 'none' WHERE id = ?";
+        $stmt = $conexao->prepare($sql);
+        $stmt->bind_param("i", $aluno_id);
         $mensagem = "<div class='alert alert-warning'>Solicitação recusada.</div>";
     }
 
-    if (isset($sql)) {
-        $stmt = $conexao->prepare($sql);
-        $stmt->bind_param("i", $aluno_id);
+    if (isset($stmt)) {
         $stmt->execute();
     }
 }

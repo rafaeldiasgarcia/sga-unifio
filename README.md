@@ -90,19 +90,117 @@ Para que o sistema funcione corretamente, ele precisa ser executado em um ambien
 
 ## **Status Atual dos Testes e Próximos Passos**
 
-**Data do Último Teste:** `13/09/2025`
+**Data do Último Teste:** `14/09/2025`
 
-**Checklist de Testes (Resumo):**
-- [ ] **Fluxo de Registro:** Todos os perfis registrando corretamente.
-- [ ] **Fluxo de Login:** Login com senha e 2FA funcionando para todos (codigo chega pelo prorpio site, por enquanto é apenas um alert, nao envia ao seu email).
-- [ ] **Painel do Aluno:** Inscrição em modalidade e solicitação para entrar na atlética.
-- [ ] **Painel do Professor:** Criação de agendamento e visualização de status.
-- [ ] **Painel do Admin da Atlética:** Aprovação de membros e inscrições; montagem completa de equipes (criar, alocar, remover, excluir).
-- [ ] **Painel do Super Admin:** CRUD completo de Atléticas, Cursos, etc. Gerenciamento e exclusão de usuários. Aprovação/Rejeição de agendamentos com motivo.
+**Status:** Em andamento
+
+
+### **Checklist Completo de Testes do Sistema SGA**
+
+#### **Parte 1: Fluxo Público (Registro e Recuperação de Senha)**
+*(Comece em uma janela anônima do navegador para garantir que não há nenhum usuário logado)*
+
+*   **Teste 1.1: Registro de Professor (Múltiplos Cursos)**
+    *   **Ação:** Acesse a página de **Registro**.
+    *   Selecione o Vínculo: **"Professor"**.
+    *   **Verificação:** O campo "RA/Matrícula" deve desaparecer. O campo "Quais cursos você dá aula?" deve aparecer.
+    *   Preencha os dados usando um e-mail institucional (`@unifio.edu.br`). No campo de cursos, segure `Ctrl` (ou `Cmd`) e selecione **dois ou mais cursos**.
+    *   **Resultado Esperado:** Registro concluído com sucesso. No banco de dados, na tabela `professores_cursos`, devem existir múltiplas entradas para o ID deste novo professor.
+
+*   **Teste 1.2: Registro de Aluno (Validação de RA)**
+    *   **Ação:** Tente registrar um "Aluno" com um RA de 5 dígitos (ex: `12345`).
+    *   **Resultado Esperado:** O sistema deve exibir um erro informando que o RA precisa ter exatamente 6 números.
+    *   **Ação:** Tente novamente com um RA de 6 dígitos (ex: `123456`).
+    *   **Resultado Esperado:** Registro concluído com sucesso.
+
+*   **Teste 1.3: Recuperação de Senha**
+    *   **Ação:** Na página de **Login**, clique em **"Esqueci a senha"**.
+    *   Digite o e-mail do Professor que você criou no Teste 1.1 e envie.
+    *   **Resultado Esperado:** Uma mensagem de simulação de e-mail deve aparecer com um link para redefinir a senha.
+    *   **Ação:** Clique no link, defina uma nova senha e salve.
+    *   **Resultado Esperado:** Uma mensagem de sucesso deve aparecer.
+    *   **Ação:** Tente fazer login com o Professor usando a **nova senha**.
+    *   **Resultado Esperado:** O login deve funcionar perfeitamente.
+
+---
+
+#### **Parte 2: Fluxo do Usuário (Professor e Aluno)**
+
+*   **Teste 2.1: Painel e Agendamento do Professor**
+    *   **Ação:** Faça login com a conta do Professor.
+    *   **Verificação:** O menu deve mostrar "Agendar Evento" e "Meus Agendamentos". O "Painel do Usuário" deve estar visível.
+    *   **Ação:** Vá para **"Agendar Evento"** e crie uma nova solicitação.
+    *   **Ação:** Vá para **"Meus Agendamentos"**.
+    *   **Resultado Esperado:** O evento recém-criado deve aparecer na lista com o status **"Pendente"**.
+
+*   **Teste 2.2: Painel do Aluno e Solicitação para Atlética**
+    *   **Ação:** Faça login com uma conta de "Aluno" (que não seja "Membro das Atléticas"). Vá para **"Editar Perfil"**.
+    *   **Verificação:** O card "Gerenciar Atlética" deve estar visível.
+    *   **Ação:** Clique no botão verde **"Quero entrar na Atlética"**.
+    *   **Resultado Esperado:** A página recarrega. A mensagem muda para "Sua solicitação para entrar na atlética está pendente de aprovação." e o botão desaparece.
+
+*   **Teste 2.3: Edição de Perfil do Professor**
+    *   **Ação:** Faça login com a conta do Professor. Vá para **"Editar Perfil"**.
+    *   **Verificação:** O campo "Cursos que Leciono" deve estar visível e com os cursos corretos pré-selecionados.
+    *   **Ação:** Mude a seleção de cursos (adicione ou remova um) e salve.
+    *   **Resultado Esperado:** Os dados devem ser salvos com sucesso.
+
+---
+
+#### **Parte 3: Fluxo do Admin da Atlética**
+
+*   **Teste 3.1: Aprovação de Novo Membro**
+    *   **Ação:** Faça login com uma conta de **Admin da Atlética**.
+    *   **Verificação:** No dashboard, o card **"Solicitações para Entrar"** deve mostrar um número maior que zero.
+    *   **Ação:** Clique para ir à página **"Gerenciar Membros"**. A solicitação do Aluno (Teste 2.2) deve estar na lista.
+    *   **Ação:** Clique em **"Aprovar"**.
+    *   **Resultado Esperado:** A solicitação some da lista. No banco de dados, o `tipo_usuario_detalhado` daquele aluno agora é "Membro das Atléticas".
+
+---
+
+#### **Parte 4: Fluxo do Super Administrador**
+
+*   **Teste 4.1: Gerenciamento de Coordenadores**
+    *   **Ação:** Faça login como **Super Admin**. Vá para **"Gerenciar Usuários"** e edite a conta do Professor.
+    *   **Ação:** Marque o checkbox **"Marcar como Professor Coordenador"** e salve.
+    *   **Ação:** Vá para **"Gerenciar Cursos"** e edite um curso.
+    *   **Verificação:** O nome do Professor agora deve aparecer na lista suspensa **"Coordenador do Curso"**.
+    *   **Ação:** Associe o professor como coordenador daquele curso e salve.
+    *   **Resultado Esperado:** A associação foi salva com sucesso.
+
+*   **Teste 4.2: Verificação do Rodapé Dinâmico**
+    *   **Ação:** Faça logout. Faça login com um Aluno que esteja matriculado no curso que você editou no teste anterior.
+    *   **Resultado Esperado:** Role até o final da página. O rodapé agora deve mostrar a seção **"Coordenação"** com o nome e e-mail do professor coordenador.
+    *   **Ação:** Faça logout e entre com um usuário da "Comunidade Externa".
+    *   **Resultado Esperado:** A seção de coordenação no rodapé **não deve aparecer**.
+
+*   **Teste 4.3: Teste de Conflito de Agendamento**
+    *   **Setup:** Crie e aprove um evento para uma data e período específicos (ex: 25/12/2025, 1º Período). Crie uma segunda solicitação (de outro professor) para a mesma data e período.
+    *   **Ação:** Como Super Admin, vá para **"Aprovar Agendamentos"** e tente aprovar a segunda solicitação.
+    *   **Resultado Esperado:** A aprovação deve falhar e uma mensagem de erro sobre o conflito de horário deve ser exibida.
+
+*   **Teste 4.4: Rejeição de Agendamento com Motivo**
+    *   **Ação:** Na mesma página, clique em **"Rejeitar"** para uma solicitação pendente. Um pop-up deve aparecer.
+    *   **Ação:** Preencha o motivo da rejeição e confirme.
+    *   **Ação:** Faça login com o Professor que criou o evento e vá para **"Meus Agendamentos"**.
+    *   **Resultado Esperado:** O evento deve estar com o status "Rejeitado" e o motivo que você escreveu deve estar visível.
+
+---
+
+#### **Parte 5: Teste Final de Presença**
+
+*   **Teste 5.1: Marcar e Desmarcar Presença**
+    *   **Ação:** Como um usuário qualquer, vá para a **"Agenda da Quadra"**.
+    *   **Ação:** Encontre um evento aprovado e clique em **"Marcar Presença"**.
+    *   **Resultado Esperado:** A página recarrega e o botão muda para **"Desmarcar Presença"**.
+    *   **Ação:** Vá para o **"Painel do Usuário"**.
+    *   **Resultado Esperado:** O evento deve aparecer na lista de **"Presenças Marcadas"**.
+    *   **Ação:** Volte para a agenda e clique em **"Desmarcar Presença"**.
+    *   **Resultado Esperado:** O botão volta para "Marcar Presença" e o evento some da lista no seu painel.
 
 ### **Onde Eu Parei:**
 
 
 
-> Estou continuando testes, ultima coisa que fiz foi testar o fluxo de criação e gerenciamento de equipes pelo Admin da Atlética. Tudo está funcionando conforme o esperado até agora, mas preciso continuar os testes nos outros tipos de perfis para garantir que todas as funcionalidades estejam operacionais.
+> * Começando os testes iniciais.
 ---
