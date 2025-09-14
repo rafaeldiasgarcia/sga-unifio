@@ -26,7 +26,7 @@
                         <li class="nav-item"><a class="nav-link" href="/sga/usuario/dashboard.php">Painel do Usuário</a></li>
                     <?php endif; ?>
 
-                    <?php if ($_SESSION["role"] == 'admin'): ?>
+                    <?php if ($_SESSION["role"] == 'admin' && $_SESSION["tipo_usuario_detalhado"] !== 'Professor' && $_SESSION["tipo_usuario_detalhado"] !== 'Professor Coordenador'): ?>
                         <li class="nav-item"><a class="nav-link" href="/sga/admin_atletica/dashboard.php">Painel Admin</a></li>
                     <?php elseif ($_SESSION["role"] == 'superadmin'): ?>
                         <li class="nav-item"><a class="nav-link" href="/sga/super_admin/dashboard.php">Painel Super Admin</a></li>

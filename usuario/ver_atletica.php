@@ -33,13 +33,17 @@ if ($atletica_id) {
             <table class="table">
                 <thead><tr><th>Nome</th><th>Email</th><th>RA</th></tr></thead>
                 <tbody>
-                <?php while($membro = $membros->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($membro['nome']); ?></td>
-                        <td><?php echo htmlspecialchars($membro['email']); ?></td>
-                        <td><?php echo htmlspecialchars($membro['ra']); ?></td>
-                    </tr>
-                <?php endwhile; ?>
+                <?php if ($membros && $membros instanceof mysqli_result && $membros->num_rows > 0): ?>
+                    <?php while($membro = $membros->fetch_assoc()): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($membro['nome']); ?></td>
+                            <td><?php echo htmlspecialchars($membro['email']); ?></td>
+                            <td><?php echo htmlspecialchars($membro['ra']); ?></td>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <tr><td colspan="3" class="text-center">Nenhum membro encontrado.</td></tr>
+                <?php endif; ?>
                 </tbody>
             </table>
         </div></div>

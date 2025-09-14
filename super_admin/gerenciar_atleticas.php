@@ -16,6 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_atletica'])) {
 // Lógica para Deletar
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_atletica'])) {
     $id = $_POST['id_to_delete'];
+    // Primeiro, desvincula todos os usuários dessa atlética
+    $stmt_update = $conexao->prepare("UPDATE usuarios SET atletica_id = NULL WHERE atletica_id = ?");
+    $stmt_update->bind_param("i", $id);
+    $stmt_update->execute();
+
+    // Agora pode deletar a atlética
     $stmt = $conexao->prepare("DELETE FROM atleticas WHERE id = ?");
     $stmt->bind_param("i", $id);
     if ($stmt->execute()) $mensagem = "<div class='alert alert-warning'>Atlética excluída com sucesso!</div>";

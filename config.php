@@ -36,6 +36,13 @@ function is_admin() {
     if ($_SESSION["role"] !== 'admin') {
         die("Acesso negado. Área restrita para Admins de Atlética.");
     }
+    // Verificação adicional para professores
+    if (isset($_SESSION["tipo_usuario_detalhado"]) && 
+        ($_SESSION["tipo_usuario_detalhado"] === 'Professor' || 
+         $_SESSION["tipo_usuario_detalhado"] === 'Professor Coordenador') &&
+        strpos($_SERVER['REQUEST_URI'], '/admin_atletica/') !== false) {
+        die("Acesso negado. Professores não podem acessar o painel da atlética.");
+    }
 }
 
 function is_superadmin() {

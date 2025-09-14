@@ -1,7 +1,13 @@
 <?php
 require_once '../config.php';
 is_admin();
-$atletica_id = $_SESSION['atletica_id'];
+$atletica_id = $_SESSION['atletica_id'] ?? null;
+$mensagem = '';
+if (!$atletica_id) {
+    echo '<div class="alert alert-danger">Erro: sua atlética não está definida. Faça login novamente ou contate o administrador.</div>';
+    include '../templates/footer.php';
+    exit;
+}
 $mensagem = '';
 
 $open_modalidade_id = $_GET['open_modalidade'] ?? null;

@@ -45,6 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_user'])) {
     $role = trim($_POST['role']);
     $tipo_usuario_detalhado = trim($_POST['tipo_usuario_detalhado']);
     $curso_id = $_POST['curso_id'] ?: null;
+    if ($tipo_usuario_detalhado == 'Professor' || $tipo_usuario_detalhado == 'Comunidade Externa') {
+        $curso_id = null;
+    }
     $atletica_id = $_POST['atletica_id'] ?: null;
     $nova_senha = trim($_POST['nova_senha']);
     $is_coordenador = isset($_POST['is_coordenador']) ? 1 : 0;

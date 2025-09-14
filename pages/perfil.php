@@ -38,12 +38,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['atualizar_dados'])) {
         }
         $info_msg = "<div class='alert alert-success'>Dados atualizados com sucesso!</div>";
     } else {
-        // Lógica para Alunos e outros
-        $sql_update = "UPDATE usuarios SET nome = ?, email = ?, data_nascimento = ?, curso_id = ? WHERE id = ?";
+        // Lógica para Alunos e membros das atléticas
+        
+        // Verifica se o curso tem atlética
+        $stmt_check_atletica = $conexao->prepare("SELECT atletica_id FROM cursos WHERE id = ?");
+        $stmt_check_atletica->bind_param("i", $curso_id_aluno);
+        $stmt_check_atletica->execute();
+        $result_atletica = $stmt_check_atletica->get_result();
+        $atletica_id = null;
+        $tipo_usuario = $usuario['tipo_usuario_detalhado'];
+        $atletica_status = $usuario['atletica_join_status'];
+        
+        if ($row_atletica = $result_atletica->fetch_assoc()) {
+            $atletica_id = $row_atletica['atletica_id'];
+            
+            // Se está mudando de curso, atualiza o status
+            if ($curso_id_aluno != $usuario['curso_id']) {
+                // Se o novo curso não tem atlética
+                if (!$atletica_id) {
+                    // Se era membro ou tinha solicitação pendente, volta para aluno comum
+                    if ($tipo_usuario == 'Membro das Atléticas' || $atletica_status == 'pendente') {
+                        $tipo_usuario = 'Aluno';
+                        $atletica_status = 'none';
+                    }
+                }
+                // Se o novo curso tem atlética
+                else {
+                    if ($tipo_usuario == 'Membro das Atléticas') {
+                        $atletica_status = 'aprovado';
+                    } elseif ($tipo_usuario == 'Aluno') {
+                        $atletica_status = 'none'; // Permite que solicite entrada na nova atlética
+                    }
+                }
+            }
+        }
+
+        $sql_update = "UPDATE usuarios SET nome = ?, email = ?, data_nascimento = ?, curso_id = ?, tipo_usuario_detalhado = ?, atletica_join_status = ?, atletica_id = ? WHERE id = ?";
         $stmt_update = $conexao->prepare($sql_update);
-        // CORREÇÃO: O tipo de dado para curso_id é 'i' (integer)
-        $stmt_update->bind_param("sssii", $nome, $email, $data_nascimento, $curso_id_aluno, $usuario_id);
+        $stmt_update->bind_param("sssissii", $nome, $email, $data_nascimento, $curso_id_aluno, $tipo_usuario, $atletica_status, $atletica_id, $usuario_id);
+        
         if ($stmt_update->execute()) {
+            // Atualiza a sessão se o tipo de usuário mudou
+            if ($_SESSION['tipo_usuario_detalhado'] != $tipo_usuario) {
+                $_SESSION['tipo_usuario_detalhado'] = $tipo_usuario;
+            }
             $info_msg = "<div class='alert alert-success'>Dados atualizados com sucesso!</div>";
         } else {
             $info_msg = "<div class='alert alert-danger'>Erro ao atualizar. O e-mail pode já estar em uso.</div>";
@@ -135,7 +173,7 @@ $cursos = $conexao->query("SELECT id, nome FROM cursos ORDER BY nome");
             <div class="card h-100">
                 <div class="card-header"><strong>Dados Pessoais</strong></div>
                 <div class="card-body">
-                    <?php echo $info_msg; ?>
+                    
                     <form action="perfil.php" method="post">
                         <div class="mb-3"><label class="form-label">RA</label><input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario['ra']); ?>" disabled></div>
                         <div class="mb-3"><label class="form-label">Nome Completo</label><input type="text" name="nome" class="form-control" value="<?php echo htmlspecialchars($usuario['nome']); ?>" required></div>
@@ -171,7 +209,7 @@ $cursos = $conexao->query("SELECT id, nome FROM cursos ORDER BY nome");
             <div class="card mb-4">
                 <div class="card-header"><strong>Alterar Senha</strong></div>
                 <div class="card-body">
-                    <?php echo $senha_msg; ?>
+                    
                     <form action="perfil.php" method="post">
                         <div class="mb-3"><label for="senha_atual" class="form-label">Senha Atual</label><input type="password" name="senha_atual" id="senha_atual" class="form-control" required></div>
                         <div class="mb-3"><label for="nova_senha" class="form-label">Nova Senha</label><input type="password" name="nova_senha" id="nova_senha" class="form-control" required></div>
@@ -185,7 +223,7 @@ $cursos = $conexao->query("SELECT id, nome FROM cursos ORDER BY nome");
                 <div class="card">
                     <div class="card-header"><strong>Gerenciar Atlética</strong></div>
                     <div class="card-body">
-                        <?php echo $atletica_msg; ?>
+                        
                         <?php if ($usuario['tipo_usuario_detalhado'] == 'Aluno'): ?>
                             <?php if ($usuario['atletica_join_status'] == 'pendente'): ?>
                                 <div class="alert alert-warning">Sua solicitação para entrar na atlética está pendente de aprovação.</div>

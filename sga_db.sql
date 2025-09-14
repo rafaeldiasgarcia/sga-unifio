@@ -59,8 +59,7 @@ CREATE TABLE `atleticas` (
 -- Despejando dados para a tabela `atleticas`
 --
 
-INSERT INTO `atleticas` (`id`, `nome`, `descricao`, `logo_url`) VALUES
-(1, 'Atlética de Direito', 'A gloriosa atlética do curso de Direito.', NULL);
+-- Sem dados iniciais para atleticas
 
 -- --------------------------------------------------------
 
@@ -79,8 +78,7 @@ CREATE TABLE `cursos` (
 -- Despejando dados para a tabela `cursos`
 --
 
-INSERT INTO `cursos` (`id`, `nome`, `atletica_id`, `coordenador_id`) VALUES
-(1, 'Direito', 1, NULL);
+-- Sem dados iniciais para cursos
 
 -- --------------------------------------------------------
 
@@ -190,9 +188,8 @@ CREATE TABLE `usuarios` (
   `role` enum('usuario','admin','superadmin') NOT NULL DEFAULT 'usuario',
   `atletica_id` int(11) DEFAULT NULL,
   `tipo_usuario_detalhado` enum('Membro das Atléticas','Professor','Aluno','Comunidade Externa') DEFAULT NULL,
-  `materia_professor` varchar(255) DEFAULT NULL,
   `is_coordenador` tinyint(1) NOT NULL DEFAULT 0,
-  `atletica_join_status` enum('none','pendente') NOT NULL DEFAULT 'none',
+  `atletica_join_status` enum('none','pendente','aprovado') NOT NULL DEFAULT 'none',
   `login_code` varchar(6) DEFAULT NULL,
   `login_code_expires` datetime DEFAULT NULL,
   `reset_token` varchar(255) DEFAULT NULL,
@@ -203,8 +200,8 @@ CREATE TABLE `usuarios` (
 -- Despejando dados para a tabela `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `ra`, `data_nascimento`, `curso_id`, `role`, `atletica_id`, `tipo_usuario_detalhado`, `materia_professor`, `is_coordenador`, `atletica_join_status`, `login_code`, `login_code_expires`, `reset_token`, `reset_token_expires`) VALUES
-(1, 'Super Admin', 'super@admin.com', '$2y$10$d8SoY8sdOkYci2Q/de.uye4c6j7Cu.CUYVxEm55Lk43l4Am7KBbqi', NULL, NULL, NULL, 'superadmin', NULL, NULL, NULL, 0, 'none', NULL, NULL, NULL, NULL);
+INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `ra`, `data_nascimento`, `curso_id`, `role`, `atletica_id`, `tipo_usuario_detalhado`, `is_coordenador`, `atletica_join_status`, `login_code`, `login_code_expires`, `reset_token`, `reset_token_expires`) VALUES
+(1, 'Super Admin', 'super@admin.com', '$2y$10$d8SoY8sdOkYci2Q/de.uye4c6j7Cu.CUYVxEm55Lk43l4Am7KBbqi', NULL, NULL, NULL, 'superadmin', NULL, NULL, 0, 'none', NULL, NULL, NULL, NULL);
 
 --
 -- Índices para tabelas despejadas

@@ -80,35 +80,10 @@ $pendentes = $conexao->query($sql_pendentes);
                                     </form>
 
                                     <!-- Botão para abrir o Modal de Rejeição -->
-                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal-<?php echo $req['id']; ?>">
+                                    <button type="button" class="btn btn-sm btn-danger" 
+                                            onclick="openRejectModal('<?php echo $req['id']; ?>', '<?php echo htmlspecialchars($req['titulo'], ENT_QUOTES); ?>')">
                                         Rejeitar
                                     </button>
-
-                                    <!-- Modal de Rejeição (um para cada solicitação) -->
-                                    <div class="modal fade" id="rejectModal-<?php echo $req['id']; ?>">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Rejeitar Agendamento</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <form method="post">
-                                                    <div class="modal-body">
-                                                        <p>Você está rejeitando o evento: <strong><?php echo htmlspecialchars($req['titulo']); ?></strong></p>
-                                                        <input type="hidden" name="agendamento_id" value="<?php echo $req['id']; ?>">
-                                                        <div class="mb-3">
-                                                            <label for="motivo_rejeicao_<?php echo $req['id']; ?>" class="form-label">Motivo da Rejeição (Obrigatório)</label>
-                                                            <textarea name="motivo_rejeicao" id="motivo_rejeicao_<?php echo $req['id']; ?>" class="form-control" rows="3" required></textarea>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                        <button type="submit" name="acao" value="rejeitar" class="btn btn-danger">Confirmar Rejeição</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
@@ -120,5 +95,41 @@ $pendentes = $conexao->query($sql_pendentes);
             </div>
         </div>
     </div>
+
+    <!-- Modal de Rejeição (único) -->
+    <div class="modal fade" id="rejectModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Rejeitar Agendamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="post">
+                    <div class="modal-body">
+                        <p>Você está rejeitando o evento: <strong id="evento-titulo"></strong></p>
+                        <input type="hidden" name="agendamento_id" id="agendamento_id">
+                        <div class="mb-3">
+                            <label for="motivo_rejeicao" class="form-label">Motivo da Rejeição (Obrigatório)</label>
+                            <textarea name="motivo_rejeicao" id="motivo_rejeicao" class="form-control" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" name="acao" value="rejeitar" class="btn btn-danger">Confirmar Rejeição</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function openRejectModal(id, titulo) {
+        document.getElementById('agendamento_id').value = id;
+        document.getElementById('evento-titulo').textContent = titulo;
+        document.getElementById('motivo_rejeicao').value = '';
+        var modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+        modal.show();
+    }
+    </script>
 
 <?php include '../templates/footer.php'; ?>

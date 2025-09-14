@@ -2,6 +2,13 @@
 require_once '../config.php';
 is_superadmin();
 $mensagem = '';
+if (isset($_GET['status'])) {
+    if ($_GET['status'] === 'added') {
+        $mensagem = "<div class='alert alert-success'>Curso adicionado!</div>";
+    } elseif ($_GET['status'] === 'deleted') {
+        $mensagem = "<div class='alert alert-warning'>Curso excluído!</div>";
+    }
+}
 
 // Lógica para Adicionar
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_curso'])) {
@@ -9,15 +16,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_curso'])) {
     $atletica_id = $_POST['atletica_id'] ?: null;
     $stmt = $conexao->prepare("INSERT INTO cursos (nome, atletica_id) VALUES (?, ?)");
     $stmt->bind_param("si", $nome, $atletica_id);
-    if ($stmt->execute()) $mensagem = "<div class='alert alert-success'>Curso adicionado!</div>";
+    if ($stmt->execute()) {
+        header("Location: gerenciar_cursos.php?status=added");
+        exit;
+    }
 }
 
 // Lógica para Deletar
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_curso'])) {
     $id = $_POST['id_to_delete'];
+    // Primeiro, desvincula todos os usuários desse curso
+    $stmt_update = $conexao->prepare("UPDATE usuarios SET curso_id = NULL WHERE curso_id = ?");
+    $stmt_update->bind_param("i", $id);
+    $stmt_update->execute();
+
+    // Agora pode deletar o curso
     $stmt = $conexao->prepare("DELETE FROM cursos WHERE id = ?");
     $stmt->bind_param("i", $id);
-    if ($stmt->execute()) $mensagem = "<div class='alert alert-warning'>Curso excluído!</div>";
+    if ($stmt->execute()) {
+        header("Location: gerenciar_cursos.php?status=deleted");
+        exit;
+    }
 }
 
 $cursos = $conexao->query("SELECT c.id, c.nome, a.nome as atletica_nome FROM cursos c LEFT JOIN atleticas a ON c.atletica_id = a.id ORDER BY c.nome");
