@@ -5,9 +5,14 @@ check_login(); // A função is_aluno() não é mais necessária, pois este é o
 $usuario_id = $_SESSION['id'];
 $tipo_usuario = $_SESSION['tipo_usuario_detalhado'];
 
-// Busca os agendamentos criados pelo usuário (se for professor)
+// Busca os agendamentos criados pelo usuário (se for professor, super admin ou admin das atléticas)
 $meus_agendamentos = [];
-if ($tipo_usuario == 'Professor') {
+$role = $_SESSION['role'] ?? '';
+$can_schedule = ($tipo_usuario == 'Professor') || 
+                ($role === 'superadmin') || 
+                ($role === 'admin' && $tipo_usuario === 'Membro das Atléticas');
+
+if ($can_schedule) {
     $stmt_agendamentos = $conexao->prepare("SELECT titulo, data_agendamento, status FROM agendamentos WHERE usuario_id = ? ORDER BY data_agendamento DESC");
     $stmt_agendamentos->bind_param("i", $usuario_id);
     $stmt_agendamentos->execute();
@@ -35,7 +40,7 @@ $presencas_marcadas = $stmt_presencas->get_result();
     <div class="row">
         <!-- Coluna da Esquerda: Informações Específicas do Perfil -->
         <div class="col-lg-8">
-            <?php if ($tipo_usuario == 'Professor'): ?>
+            <?php if ($can_schedule): ?>
                 <div class="card">
                     <div class="card-header"><strong>Meus Agendamentos Criados</strong></div>
                     <div class="card-body">
@@ -53,7 +58,7 @@ $presencas_marcadas = $stmt_presencas->get_result();
                         <?php endif; ?>
                     </div>
                 </div>
-            <?php else: // Para Alunos, Membros, Comunidade Externa ?>
+            <?php else: // Para Alunos, Comunidade Externa, etc. ?>
                 <div class="card">
                     <div class="card-header"><strong>Minhas Atividades</strong></div>
                     <div class="card-body">

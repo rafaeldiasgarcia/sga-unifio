@@ -31,3 +31,46 @@ main.container {
     color: #0d6efd; /* Azul do Bootstrap */
     background-color: #e7f1ff; /* Um azul bem claro */
 }
+
+/* Melhorias para tabelas de gerenciamento */
+.table th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Efeito hover nas linhas da tabela */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Botões de ação na tabela */
+.btn-outline-primary:hover,
+.btn-outline-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Badges das equipes */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Melhorar responsividade dos botões de ação */
+@media (max-width: 768px) {
+    .table td .d-flex {
+        flex-direction: column;
+        gap: 0.25rem !important;
+    }
+    
+    .table td .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

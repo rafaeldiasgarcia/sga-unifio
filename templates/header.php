@@ -32,7 +32,15 @@
                         <li class="nav-item"><a class="nav-link" href="/sga/super_admin/dashboard.php">Painel Super Admin</a></li>
                     <?php endif; ?>
 
-                    <?php if (isset($_SESSION['tipo_usuario_detalhado']) && $_SESSION['tipo_usuario_detalhado'] == 'Professor'): ?>
+                    <?php 
+                    // Verifica se pode agendar eventos (Professor, Super Admin ou Admin das Atléticas)
+                    $tipo_usuario = $_SESSION['tipo_usuario_detalhado'] ?? '';
+                    $role = $_SESSION['role'] ?? '';
+                    $can_schedule = ($tipo_usuario === 'Professor') || 
+                                    ($role === 'superadmin') || 
+                                    ($role === 'admin' && $tipo_usuario === 'Membro das Atléticas');
+                    
+                    if ($can_schedule): ?>
                         <li class="nav-item"><a class="nav-link" href="/sga/pages/agendar_evento.php">Agendar Evento</a></li>
                         <li class="nav-item"><a class="nav-link" href="/sga/pages/meus_agendamentos.php">Meus Agendamentos</a></li>
                     <?php endif; ?>
@@ -52,8 +60,8 @@
                         </ul>
                     </li>
                 <?php else: ?>
-                    <li class="nav-item"><a class="nav-link" href="/sga/login.php">Login</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/sga/registro.php">Registrar</a></li>
+                    <!-- <li class="nav-item"><a class="nav-link" href="/sga/login.php">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/sga/registro.php">Registrar</a></li> -->
                 <?php endif; ?>
             </ul>
         </div>

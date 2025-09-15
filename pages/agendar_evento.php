@@ -2,11 +2,22 @@
 require_once '../config.php';
 check_login();
 
-// Redireciona se não for professor
-if (!isset($_SESSION['tipo_usuario_detalhado']) || $_SESSION['tipo_usuario_detalhado'] !== 'Professor') {
+// Redireciona se não for professor, super admin ou admin das atléticas
+$tipo_usuario = $_SESSION['tipo_usuario_detalhado'] ?? '';
+$role = $_SESSION['role'] ?? '';
+
+$can_schedule = ($tipo_usuario === 'Professor') || 
+                ($role === 'superadmin') || 
+                ($role === 'admin' && $tipo_usuario === 'Membro das Atléticas');
+
+if (!$can_schedule) {
     header("location: ../index.php");
     exit;
 }
+
+// Buscar modalidades ativas do banco de dados
+$modalidades_query = "SELECT id, nome FROM modalidades ORDER BY nome";
+$modalidades_result = $conexao->query($modalidades_query);
 
 $mensagem = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -68,12 +79,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
 
                 <div class="col-md-4 mb-3" id="campo_esporte">
-                    <label for="esporte_tipo" class="form-label">Qual Esporte?</label>
+                    <label for="esporte_tipo" class="form-label">Qual Modalidade?</label>
                     <select name="esporte_tipo" id="esporte_tipo" class="form-select">
-                        <option value="Futsal">Futsal</option>
-                        <option value="Vôlei">Vôlei</option>
-                        <option value="Basquete">Basquete</option>
-                        <option value="Handebol">Handebol</option>
+                        <option value="">-- Selecione uma modalidade --</option>
+                        <?php if ($modalidades_result && $modalidades_result->num_rows > 0): ?>
+                            <?php while($modalidade = $modalidades_result->fetch_assoc()): ?>
+                                <option value="<?php echo htmlspecialchars($modalidade['nome']); ?>">
+                                    <?php echo htmlspecialchars($modalidade['nome']); ?>
+                                </option>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <option value="" disabled>Nenhuma modalidade disponível</option>
+                        <?php endif; ?>
                     </select>
                 </div>
 

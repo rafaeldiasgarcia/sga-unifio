@@ -2,7 +2,15 @@
 require_once '../config.php';
 check_login();
 
-if (!isset($_SESSION['tipo_usuario_detalhado']) || $_SESSION['tipo_usuario_detalhado'] !== 'Professor') {
+// Redireciona se não for professor, super admin ou admin das atléticas
+$tipo_usuario = $_SESSION['tipo_usuario_detalhado'] ?? '';
+$role = $_SESSION['role'] ?? '';
+
+$can_schedule = ($tipo_usuario === 'Professor') || 
+                ($role === 'superadmin') || 
+                ($role === 'admin' && $tipo_usuario === 'Membro das Atléticas');
+
+if (!$can_schedule) {
     header("location: ../index.php");
     exit;
 }

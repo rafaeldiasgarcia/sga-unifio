@@ -3,188 +3,264 @@ require_once '../config.php';
 is_admin();
 $atletica_id = $_SESSION['atletica_id'] ?? null;
 $mensagem = '';
+
 if (!$atletica_id) {
     echo '<div class="alert alert-danger">Erro: sua atlética não está definida. Faça login novamente ou contate o administrador.</div>';
     include '../templates/footer.php';
     exit;
 }
-$mensagem = '';
 
-$open_modalidade_id = $_GET['open_modalidade'] ?? null;
+$open_evento_id = $_GET['open_evento'] ?? null;
 
-// Ação: Criar nova equipe
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['criar_equipe'])) {
-    $nome_equipe = trim($_POST['nome_equipe']);
-    $modalidade_id = $_POST['modalidade_id'];
-    if (!empty($nome_equipe) && !empty($modalidade_id)) {
-        $sql_insert = "INSERT INTO equipes (nome, modalidade_id, atletica_id) VALUES (?, ?, ?)";
-        $stmt_insert = $conexao->prepare($sql_insert);
-        $stmt_insert->bind_param("sii", $nome_equipe, $modalidade_id, $atletica_id);
-        $stmt_insert->execute();
-        header("Location: gerenciar_equipes.php?open_modalidade=" . $modalidade_id);
-        exit;
-    }
+// Verificar se há mensagem de sucesso da sessão
+if (isset($_SESSION['mensagem_sucesso'])) {
+    $mensagem = "<div class='alert alert-success'>" . $_SESSION['mensagem_sucesso'] . "</div>";
+    unset($_SESSION['mensagem_sucesso']);
 }
 
-// Ação: Alocar usuario em equipe
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['alocar_aluno'])) {
-    $equipe_id = $_POST['equipe_id'];
+// Ação: Inscrever aluno em evento esportivo
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['inscrever_aluno'])) {
+    $evento_id = $_POST['evento_id'];
     $aluno_id = $_POST['aluno_id'];
-    $modalidade_id = $_POST['modalidade_id_hidden'];
-
-    $sql_alocar = "INSERT INTO equipe_membros (equipe_id, aluno_id) VALUES (?, ?)";
-    $stmt_alocar = $conexao->prepare($sql_alocar);
-    $stmt_alocar->bind_param("ii", $equipe_id, $aluno_id);
-    $stmt_alocar->execute();
-    header("Location: gerenciar_equipes.php?open_modalidade=" . $modalidade_id);
+    
+    // Verificar se o aluno pertence à atlética do admin
+    $sql_verificar = "SELECT u.id FROM usuarios u 
+                     JOIN cursos c ON u.curso_id = c.id 
+                     WHERE u.id = ? AND c.atletica_id = ?";
+    $stmt_verificar = $conexao->prepare($sql_verificar);
+    $stmt_verificar->bind_param("ii", $aluno_id, $atletica_id);
+    $stmt_verificar->execute();
+    
+    if ($stmt_verificar->get_result()->num_rows > 0) {
+        // Verificar se já não está inscrito
+        $sql_check = "SELECT id FROM inscricoes_eventos WHERE aluno_id = ? AND evento_id = ?";
+        $stmt_check = $conexao->prepare($sql_check);
+        $stmt_check->bind_param("ii", $aluno_id, $evento_id);
+        $stmt_check->execute();
+        
+        if ($stmt_check->get_result()->num_rows == 0) {
+            // Inserir inscrição
+            $sql_insert = "INSERT INTO inscricoes_eventos (aluno_id, evento_id, atletica_id, status) VALUES (?, ?, ?, 'aprovado')";
+            $stmt_insert = $conexao->prepare($sql_insert);
+            $stmt_insert->bind_param("iii", $aluno_id, $evento_id, $atletica_id);
+            
+            if ($stmt_insert->execute()) {
+                $_SESSION['mensagem_sucesso'] = "Aluno inscrito com sucesso no evento!";
+            } else {
+                $mensagem = "<div class='alert alert-danger'>Erro ao inscrever aluno no evento.</div>";
+            }
+        } else {
+            $mensagem = "<div class='alert alert-warning'>Este aluno já está inscrito neste evento.</div>";
+        }
+    } else {
+        $mensagem = "<div class='alert alert-danger'>Acesso negado: Este aluno não pertence à sua atlética.</div>";
+    }
+    
+    header("Location: gerenciar_equipes.php?open_evento=" . $evento_id);
     exit;
 }
 
-// --- NOVA LÓGICA: Excluir uma equipe inteira ---
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_team'])) {
-    $equipe_id_to_delete = $_POST['equipe_id_to_delete'];
-    $modalidade_id = $_POST['modalidade_id_hidden'];
-
-    // Deleta primeiro os membros para não violar a chave estrangeira
-    $sql_delete_members = "DELETE FROM equipe_membros WHERE equipe_id = ?";
-    $stmt_delete_members = $conexao->prepare($sql_delete_members);
-    $stmt_delete_members->bind_param("i", $equipe_id_to_delete);
-    $stmt_delete_members->execute();
-
-    // Agora deleta a equipe
-    $sql_delete_team = "DELETE FROM equipes WHERE id = ? AND atletica_id = ?";
-    $stmt_delete_team = $conexao->prepare($sql_delete_team);
-    $stmt_delete_team->bind_param("ii", $equipe_id_to_delete, $atletica_id);
-    $stmt_delete_team->execute();
-
-    header("Location: gerenciar_equipes.php?open_modalidade=" . $modalidade_id);
+// Ação: Remover inscrição de aluno
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['remover_inscricao'])) {
+    $inscricao_id = $_POST['inscricao_id'];
+    $evento_id = $_POST['evento_id'];
+    
+    // Verificar se a inscrição pertence à atlética do admin
+    $sql_verificar = "SELECT ie.id FROM inscricoes_eventos ie 
+                     JOIN usuarios u ON ie.aluno_id = u.id 
+                     JOIN cursos c ON u.curso_id = c.id 
+                     WHERE ie.id = ? AND c.atletica_id = ?";
+    $stmt_verificar = $conexao->prepare($sql_verificar);
+    $stmt_verificar->bind_param("ii", $inscricao_id, $atletica_id);
+    $stmt_verificar->execute();
+    
+    if ($stmt_verificar->get_result()->num_rows > 0) {
+        $sql_delete = "DELETE FROM inscricoes_eventos WHERE id = ?";
+        $stmt_delete = $conexao->prepare($sql_delete);
+        $stmt_delete->bind_param("i", $inscricao_id);
+        
+        if ($stmt_delete->execute()) {
+            $_SESSION['mensagem_sucesso'] = "Inscrição removida com sucesso!";
+        } else {
+            $mensagem = "<div class='alert alert-danger'>Erro ao remover inscrição.</div>";
+        }
+    } else {
+        $mensagem = "<div class='alert alert-danger'>Acesso negado.</div>";
+    }
+    
+    header("Location: gerenciar_equipes.php?open_evento=" . $evento_id);
     exit;
 }
 
-// --- NOVA LÓGICA: Remover um membro de uma equipe ---
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['remove_member'])) {
-    $membro_id_to_remove = $_POST['membro_id_to_remove'];
-    $modalidade_id = $_POST['modalidade_id_hidden'];
-
-    $sql_remove = "DELETE FROM equipe_membros WHERE id = ?";
-    $stmt_remove = $conexao->prepare($sql_remove);
-    $stmt_remove->bind_param("i", $membro_id_to_remove);
-    $stmt_remove->execute();
-
-    header("Location: gerenciar_equipes.php?open_modalidade=" . $modalidade_id);
-    exit;
-}
-
-// Buscar modalidades do evento ativo
-$sql_modalidades = "SELECT m.id, m.nome FROM modalidades m JOIN eventos e ON m.evento_id = e.id WHERE e.ativo = 1";
-$modalidades = $conexao->query($sql_modalidades);
+// Buscar eventos esportivos aprovados
+$sql_eventos = "SELECT id, titulo, data_agendamento, esporte_tipo, descricao 
+                FROM agendamentos 
+                WHERE tipo_agendamento = 'esportivo' 
+                AND status = 'aprovado' 
+                AND data_agendamento >= CURDATE()
+                ORDER BY data_agendamento ASC";
+$eventos = $conexao->query($sql_eventos);
+?>
 ?>
 
 <?php include '../templates/header.php'; ?>
-    <h1>Gerenciar Equipes e Atletas</h1>
-    <p>Crie equipes para as modalidades e aloque os membros da sua atlética.</p>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-users-cog"></i> Gerenciar Participações em Eventos Esportivos</h2>
+    <div class="text-muted">
+        <i class="fas fa-info-circle"></i> Inscreva membros da sua atlética nos eventos esportivos aprovados
+    </div>
+</div>
+
 <?php echo $mensagem; ?>
 
-    <div class="accordion" id="accordionModalidades">
-        <?php if ($modalidades->num_rows > 0): ?>
-            <?php while($modalidade = $modalidades->fetch_assoc()):
-                $modalidade_id = $modalidade['id'];
-                $button_class = ($modalidade_id == $open_modalidade_id) ? '' : 'collapsed';
-                $body_class = ($modalidade_id == $open_modalidade_id) ? 'show' : '';
-                ?>
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button <?php echo $button_class; ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<?php echo $modalidade_id; ?>"><strong><?php echo htmlspecialchars($modalidade['nome']); ?></strong></button></h2>
-                    <div id="collapse-<?php echo $modalidade_id; ?>" class="accordion-collapse collapse <?php echo $body_class; ?>" data-bs-parent="#accordionModalidades">
-                        <div class="accordion-body">
-                            <div class="row">
-                                <div class="col-md-7">
-                                    <h5>Equipes Criadas</h5>
-                                    <?php
-                                    $sql_equipes = "SELECT id, nome FROM equipes WHERE modalidade_id = ? AND atletica_id = ?";
-                                    $stmt_equipes = $conexao->prepare($sql_equipes);
-                                    $stmt_equipes->bind_param("ii", $modalidade_id, $atletica_id);
-                                    $stmt_equipes->execute();
-                                    $equipes = $stmt_equipes->get_result();
+<div class="accordion" id="accordionEventos">
+    <?php if ($eventos->num_rows > 0): ?>
+        <?php while($evento = $eventos->fetch_assoc()):
+            $evento_id = $evento['id'];
+            $button_class = ($evento_id == $open_evento_id) ? '' : 'collapsed';
+            $body_class = ($evento_id == $open_evento_id) ? 'show' : '';
+            
+            // Formatar data
+            $data_formatada = date('d/m/Y', strtotime($evento['data_agendamento']));
+            ?>
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button <?php echo $button_class; ?>" 
+                            type="button" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#collapse-<?php echo $evento_id; ?>"
+                            aria-expanded="<?php echo $open_evento_id == $evento_id ? 'true' : 'false'; ?>">
+                        <div class="d-flex w-100 justify-content-between align-items-center me-3">
+                            <span>
+                                <strong><?php echo htmlspecialchars($evento['titulo']); ?></strong>
+                                <span class="badge bg-primary ms-2"><?php echo htmlspecialchars($evento['esporte_tipo']); ?></span>
+                            </span>
+                            <span class="text-muted">
+                                <i class="fas fa-calendar-alt"></i> <?php echo $data_formatada; ?>
+                            </span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="collapse-<?php echo $evento_id; ?>" 
+                     class="accordion-collapse collapse <?php echo $body_class; ?>" 
+                     data-bs-parent="#accordionEventos">
+                    <div class="accordion-body">
+                        <?php if (!empty($evento['descricao'])): ?>
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-info-circle"></i> 
+                                <strong>Descrição:</strong> <?php echo htmlspecialchars($evento['descricao']); ?>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <div class="row">
+                            <div class="col-md-7">
+                                <h5><i class="fas fa-users"></i> Alunos Inscritos da sua Atlética</h5>
+                                <?php
+                                // Buscar alunos inscritos da atlética do admin
+                                $sql_inscritos = "SELECT ie.id as inscricao_id, u.nome, u.ra 
+                                                 FROM inscricoes_eventos ie 
+                                                 JOIN usuarios u ON ie.aluno_id = u.id 
+                                                 JOIN cursos c ON u.curso_id = c.id 
+                                                 WHERE ie.evento_id = ? AND c.atletica_id = ?
+                                                 ORDER BY u.nome";
+                                $stmt_inscritos = $conexao->prepare($sql_inscritos);
+                                $stmt_inscritos->bind_param("ii", $evento_id, $atletica_id);
+                                $stmt_inscritos->execute();
+                                $inscritos = $stmt_inscritos->get_result();
 
-                                    if ($equipes->num_rows > 0) {
-                                        while($equipe = $equipes->fetch_assoc()) {
-                                            echo "<div class='d-flex justify-content-between align-items-center'>";
-                                            echo "<p class='mb-1'><strong>" . htmlspecialchars($equipe['nome']) . "</strong></p>";
-                                            // NOVO: Formulário para deletar a equipe
-                                            echo "<form method='post' onsubmit=\"return confirm('Tem certeza que deseja excluir esta equipe e remover todos os seus membros?');\">
-                                                <input type='hidden' name='equipe_id_to_delete' value='{$equipe['id']}'>
-                                                <input type='hidden' name='modalidade_id_hidden' value='{$modalidade_id}'>
-                                                <button type='submit' name='delete_team' class='btn btn-sm btn-outline-danger'><i class='bi bi-trash'></i></button>
-                                              </form>";
-                                            echo "</div>";
-
-                                            // ATUALIZADO: Busca o ID do membro para permitir a remoção
-                                            $sql_membros = "SELECT u.nome, em.id as membro_id FROM equipe_membros em JOIN usuarios u ON em.aluno_id = u.id WHERE em.equipe_id = ?";
-                                            $stmt_membros = $conexao->prepare($sql_membros);
-                                            $stmt_membros->bind_param("i", $equipe['id']);
-                                            $stmt_membros->execute();
-                                            $membros = $stmt_membros->get_result();
-                                            if ($membros->num_rows > 0) {
-                                                echo "<ul class='list-group list-group-flush mb-3'>";
-                                                while($membro = $membros->fetch_assoc()) {
-                                                    echo "<li class='list-group-item d-flex justify-content-between align-items-center py-1'>" . htmlspecialchars($membro['nome']);
-                                                    // NOVO: Formulário para remover o membro
-                                                    echo "<form method='post' onsubmit=\"return confirm('Tem certeza que deseja remover este membro da equipe?');\">
-                                                        <input type='hidden' name='membro_id_to_remove' value='{$membro['membro_id']}'>
-                                                        <input type='hidden' name='modalidade_id_hidden' value='{$modalidade_id}'>
-                                                        <button type='submit' name='remove_member' class='btn btn-sm btn-link text-danger'><i class='bi bi-x-circle'></i></button>
-                                                      </form>";
-                                                    echo "</li>";
-                                                }
-                                                echo "</ul>";
-                                            } else {
-                                                echo "<p class='text-muted'>Nenhum usuario alocado.</p>";
-                                            }
-                                        }
-                                    } else {
-                                        echo "<p class='text-muted'>Nenhuma equipe criada.</p>";
+                                if ($inscritos->num_rows > 0) {
+                                    echo "<div class='table-responsive'>";
+                                    echo "<table class='table table-sm table-striped'>";
+                                    echo "<thead class='table-dark'>";
+                                    echo "<tr><th>Nome</th><th>RA</th><th width='80'>Ação</th></tr>";
+                                    echo "</thead><tbody>";
+                                    
+                                    while($inscrito = $inscritos->fetch_assoc()) {
+                                        echo "<tr>";
+                                        echo "<td>" . htmlspecialchars($inscrito['nome']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($inscrito['ra']) . "</td>";
+                                        echo "<td>";
+                                        echo "<form method='post' class='d-inline' onsubmit=\"return confirm('Tem certeza que deseja remover este aluno do evento?');\">";
+                                        echo "<input type='hidden' name='inscricao_id' value='{$inscrito['inscricao_id']}'>";
+                                        echo "<input type='hidden' name='evento_id' value='{$evento_id}'>";
+                                        echo "<button type='submit' name='remover_inscricao' class='btn btn-sm btn-outline-danger' title='Remover inscrição'>";
+                                        echo "<i class='fas fa-times'></i>";
+                                        echo "</button>";
+                                        echo "</form>";
+                                        echo "</td>";
+                                        echo "</tr>";
                                     }
-                                    ?>
-                                    <hr>
-                                    <h5>Criar Nova Equipe</h5>
-                                    <form method="post" class="row g-2"><input type="hidden" name="modalidade_id" value="<?php echo $modalidade_id; ?>"><div class="col-auto"><input type="text" name="nome_equipe" class="form-control" placeholder="Ex: Futsal Titular" required></div><div class="col-auto"><button type="submit" name="criar_equipe" class="btn btn-secondary">Criar</button></div></form>
-                                </div>
-                                <div class="col-md-5 border-start">
-                                    <h5>Alocar Membros da Atlética</h5>
-                                    <?php
-                                    $sql_alunos = "SELECT u.id, u.nome FROM usuarios u 
-                                               JOIN cursos c ON u.curso_id = c.id
-                                               WHERE c.atletica_id = ? AND u.tipo_usuario_detalhado = 'Membro das Atléticas' AND u.id NOT IN 
-                                               (SELECT em.aluno_id FROM equipe_membros em JOIN equipes eq ON em.equipe_id = eq.id WHERE eq.modalidade_id = ?)
-                                               ORDER BY u.nome";
-                                    $stmt_alunos = $conexao->prepare($sql_alunos);
-                                    $stmt_alunos->bind_param("ii", $atletica_id, $modalidade_id);
-                                    $stmt_alunos->execute();
-                                    $alunos_para_alocar = $stmt_alunos->get_result();
+                                    echo "</tbody></table>";
+                                    echo "</div>";
+                                } else {
+                                    echo "<div class='text-center py-3'>";
+                                    echo "<i class='fas fa-user-slash fa-2x text-muted mb-2'></i>";
+                                    echo "<p class='text-muted'>Nenhum aluno da sua atlética está inscrito neste evento ainda.</p>";
+                                    echo "</div>";
+                                }
+                                ?>
+                            </div>
+                            
+                            <div class="col-md-5 border-start">
+                                <h5><i class="fas fa-user-plus"></i> Inscrever Membros da Atlética</h5>
+                                <?php
+                                // Buscar alunos da atlética que ainda não estão inscritos neste evento
+                                $sql_disponiveis = "SELECT u.id, u.nome, u.ra 
+                                                   FROM usuarios u 
+                                                   JOIN cursos c ON u.curso_id = c.id
+                                                   WHERE c.atletica_id = ? 
+                                                   AND u.tipo_usuario_detalhado = 'Membro das Atléticas' 
+                                                   AND u.id NOT IN (
+                                                       SELECT ie.aluno_id 
+                                                       FROM inscricoes_eventos ie 
+                                                       WHERE ie.evento_id = ?
+                                                   )
+                                                   ORDER BY u.nome";
+                                $stmt_disponiveis = $conexao->prepare($sql_disponiveis);
+                                $stmt_disponiveis->bind_param("ii", $atletica_id, $evento_id);
+                                $stmt_disponiveis->execute();
+                                $alunos_disponiveis = $stmt_disponiveis->get_result();
 
-                                    $equipes->data_seek(0);
-                                    if ($alunos_para_alocar->num_rows > 0 && $equipes->num_rows > 0) {
-                                        while($aluno = $alunos_para_alocar->fetch_assoc()) {
-                                            echo "<div class='d-flex justify-content-between align-items-center mb-2 p-2 border rounded'><span>" . htmlspecialchars($aluno['nome']) . "</span><form method='post' class='d-inline'><input type='hidden' name='aluno_id' value='" . $aluno['id'] . "'><input type='hidden' name='modalidade_id_hidden' value='" . $modalidade_id . "'><select name='equipe_id' class='form-select form-select-sm d-inline w-auto me-2'>";
-                                            $equipes->data_seek(0);
-                                            while($equipe = $equipes->fetch_assoc()) {
-                                                echo "<option value='" . $equipe['id'] . "'>" . htmlspecialchars($equipe['nome']) . "</option>";
-                                            }
-                                            echo "</select><button type='submit' name='alocar_aluno' class='btn btn-success btn-sm'>Alocar</button></form></div>";
-                                        }
-                                    } else {
-                                        echo "<p class='text-muted'>Todos os membros da atlética já foram alocados nesta modalidade, ou não há equipes criadas.</p>";
+                                if ($alunos_disponiveis->num_rows > 0) {
+                                    while($aluno = $alunos_disponiveis->fetch_assoc()) {
+                                        echo "<div class='d-flex justify-content-between align-items-center mb-2 p-2 border rounded'>";
+                                        echo "<div>";
+                                        echo "<strong>" . htmlspecialchars($aluno['nome']) . "</strong><br>";
+                                        echo "<small class='text-muted'>RA: " . htmlspecialchars($aluno['ra']) . "</small>";
+                                        echo "</div>";
+                                        echo "<form method='post' class='d-inline'>";
+                                        echo "<input type='hidden' name='aluno_id' value='{$aluno['id']}'>";
+                                        echo "<input type='hidden' name='evento_id' value='{$evento_id}'>";
+                                        echo "<button type='submit' name='inscrever_aluno' class='btn btn-success btn-sm'>";
+                                        echo "<i class='fas fa-plus'></i> Inscrever";
+                                        echo "</button>";
+                                        echo "</form>";
+                                        echo "</div>";
                                     }
-                                    ?>
-                                </div>
+                                } else {
+                                    echo "<div class='text-center py-3'>";
+                                    echo "<i class='fas fa-check-circle fa-2x text-success mb-2'></i>";
+                                    echo "<p class='text-muted'>Todos os membros da atlética já estão inscritos neste evento ou não há membros disponíveis.</p>";
+                                    echo "</div>";
+                                }
+                                ?>
                             </div>
                         </div>
                     </div>
                 </div>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <div class="alert alert-info">Nenhuma modalidade disponível no evento ativo.</div>
-        <?php endif; ?>
-    </div>
+            </div>
+        <?php endwhile; ?>
+    <?php else: ?>
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Nenhum evento esportivo disponível</h5>
+                <p class="text-muted">Não há eventos esportivos aprovados programados para o futuro.</p>
+                <small class="text-muted">Os eventos aparecem aqui após serem aprovados pelos administradores.</small>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
 
 <?php include '../templates/footer.php'; ?>
