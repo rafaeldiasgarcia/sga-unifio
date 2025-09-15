@@ -1,0 +1,9 @@
+# Bloquear acesso direto a arquivos de configuração e scripts sensíveis
+Order Deny,Allow
+Deny from all
+
+# Permitir apenas execução via include/require do PHP
+<Files "*.php">
+    Order Deny,Allow
+    Deny from all
+</Files>

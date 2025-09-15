@@ -1,0 +1,6 @@
+# Bloquear acesso direto a arquivos SQL
+Order Deny,Allow
+Deny from all
+
+# Bloquear listagem de diretório
+Options -Indexes
