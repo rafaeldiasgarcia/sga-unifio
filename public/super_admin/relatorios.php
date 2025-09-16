@@ -225,30 +225,30 @@ $eventos_select = $conexao->query($sql_eventos_select);
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="info-section">
-                            <h6 class="section-title">ℹ️ Informações do Evento</h6>
-                            <div class="info-grid">
-                                <div class="info-item">
+                        <div class="bg-light p-4 rounded h-100">
+                            <h6 class="text-primary border-bottom border-primary pb-2 mb-3">ℹ️ Informações do Evento</h6>
+                            <div class="d-grid gap-2">
+                                <div class="p-3 bg-white rounded border-start border-primary border-3">
                                     <strong>Título:</strong> <?php echo htmlspecialchars($dados_relatorio['evento']['titulo']); ?>
                                 </div>
-                                <div class="info-item">
+                                <div class="p-3 bg-white rounded border-start border-primary border-3">
                                     <strong>Data:</strong> <?php echo date('d/m/Y', strtotime($dados_relatorio['evento']['data_agendamento'])); ?>
                                 </div>
-                                <div class="info-item">
+                                <div class="p-3 bg-white rounded border-start border-primary border-3">
                                     <strong>Período:</strong> <?php echo htmlspecialchars($dados_relatorio['evento']['periodo']); ?>
                                 </div>
-                                <div class="info-item">
+                                <div class="p-3 bg-white rounded border-start border-primary border-3">
                                     <strong>Tipo:</strong> <?php echo ucfirst(str_replace('_', ' ', $dados_relatorio['evento']['tipo_agendamento'])); ?>
                                 </div>
                                 <?php if ($dados_relatorio['evento']['esporte_tipo']): ?>
-                                <div class="info-item">
+                                <div class="p-3 bg-white rounded border-start border-primary border-3">
                                     <strong>Modalidade:</strong> <?php echo htmlspecialchars($dados_relatorio['evento']['esporte_tipo']); ?>
                                 </div>
                                 <?php endif; ?>
-                                <div class="info-item">
+                                <div class="p-3 bg-white rounded border-start border-primary border-3">
                                     <strong>Responsável:</strong> <?php echo htmlspecialchars($dados_relatorio['evento']['responsavel']); ?>
                                 </div>
-                                <div class="info-item">
+                                <div class="p-3 bg-white rounded border-start border-primary border-3">
                                     <strong>Status:</strong>
                                     <span class="badge bg-<?php echo $dados_relatorio['evento']['status'] == 'aprovado' ? 'success' : ($dados_relatorio['evento']['status'] == 'pendente' ? 'warning' : 'danger'); ?>">
                                         <?php echo ucfirst($dados_relatorio['evento']['status']); ?>
@@ -258,22 +258,28 @@ $eventos_select = $conexao->query($sql_eventos_select);
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="stats-section">
-                            <h6 class="section-title">📊 Estatísticas de Participação</h6>
-                            <div class="stats-grid">
-                                <div class="stat-card">
-                                    <div class="stat-number"><?php echo $dados_relatorio['evento']['quantidade_pessoas'] ?: '0'; ?></div>
-                                    <div class="stat-label">Pessoas Estimadas</div>
+                        <div class="bg-light p-4 rounded h-100">
+                            <h6 class="text-primary border-bottom border-primary pb-2 mb-3">📊 Estatísticas de Participação</h6>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="bg-white p-3 rounded text-center border border-2">
+                                        <div class="stat-number"><?php echo $dados_relatorio['evento']['quantidade_pessoas'] ?: '0'; ?></div>
+                                        <div class="text-muted small mt-1">Pessoas Estimadas</div>
+                                    </div>
                                 </div>
-                                <div class="stat-card">
-                                    <div class="stat-number"><?php echo $dados_relatorio['total_presencas']; ?></div>
-                                    <div class="stat-label">Presenças Confirmadas</div>
+                                <div class="col-12">
+                                    <div class="bg-white p-3 rounded text-center border border-2">
+                                        <div class="stat-number"><?php echo $dados_relatorio['total_presencas']; ?></div>
+                                        <div class="text-muted small mt-1">Presenças Confirmadas</div>
+                                    </div>
                                 </div>
                                 <?php if ($dados_relatorio['evento']['atletica_confirmada']): ?>
-                                <div class="stat-card atletica-confirmed">
-                                    <div class="stat-number"><?php echo $dados_relatorio['evento']['quantidade_atletica']; ?></div>
-                                    <div class="stat-label">Pessoas da Atlética</div>
-                                    <div class="stat-sublabel"><?php echo htmlspecialchars($dados_relatorio['evento']['atletica_confirmada_nome']); ?></div>
+                                <div class="col-12">
+                                    <div class="stat-card atletica-confirmed p-3 rounded text-center border border-2">
+                                        <div class="stat-number"><?php echo $dados_relatorio['evento']['quantidade_atletica']; ?></div>
+                                        <div class="text-muted small mt-1">Pessoas da Atlética</div>
+                                        <div class="text-success fw-bold small mt-1"><?php echo htmlspecialchars($dados_relatorio['evento']['atletica_confirmada_nome']); ?></div>
+                                    </div>
                                 </div>
                                 <?php endif; ?>
                             </div>
@@ -282,8 +288,8 @@ $eventos_select = $conexao->query($sql_eventos_select);
                 </div>
 
                 <?php if ($dados_relatorio['presencas']->num_rows > 0): ?>
-                <div class="participants-section mt-4">
-                    <h6 class="section-title">👥 Lista de Presenças Confirmadas (<?php echo $dados_relatorio['total_presencas']; ?>)</h6>
+                <div class="bg-light p-4 rounded mt-4">
+                    <h6 class="text-primary border-bottom border-primary pb-2 mb-3">👥 Lista de Presenças Confirmadas (<?php echo $dados_relatorio['total_presencas']; ?>)</h6>
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead class="table-dark">
@@ -311,8 +317,8 @@ $eventos_select = $conexao->query($sql_eventos_select);
                     </div>
                 </div>
                 <?php else: ?>
-                <div class="no-data-section mt-4">
-                    <div class="alert alert-info text-center">
+                <div class="bg-light p-4 rounded mt-4">
+                    <div class="alert alert-info text-center mb-0">
                         <i class="bi bi-info-circle"></i>
                         <strong>Nenhuma presença confirmada</strong><br>
                         Este evento ainda não possui presenças confirmadas.
@@ -320,7 +326,7 @@ $eventos_select = $conexao->query($sql_eventos_select);
                 </div>
                 <?php endif; ?>
 
-                <div class="report-footer mt-4 pt-3 border-top">
+                <div class="bg-light p-3 rounded mt-4 border-top border-2">
                     <div class="row">
                         <div class="col-md-6">
                             <small class="text-muted">
@@ -357,79 +363,73 @@ $eventos_select = $conexao->query($sql_eventos_select);
             </div>
             <div class="card-body">
                 <!-- Resumo Executivo -->
-                <div class="executive-summary mb-4">
-                    <div class="row">
+                <div class="bg-gradient-primary-subtle p-4 rounded border mb-4">
+                    <div class="row g-3">
                         <div class="col-md-4">
-                            <div class="summary-card bg-primary">
-                                <h6>📅 Estatísticas Gerais</h6>
-                                <div class="summary-stats">
-                                    <div class="stat-row">
-                                        <span>Total de Eventos:</span>
-                                        <strong><?php echo $dados_relatorio['estatisticas']['total_eventos']; ?></strong>
-                                    </div>
-                                    <div class="stat-row">
-                                        <span>Eventos Aprovados:</span>
-                                        <strong class="text-success"><?php echo $dados_relatorio['estatisticas']['eventos_aprovados']; ?></strong>
-                                    </div>
-                                    <div class="stat-row">
-                                        <span>Eventos Pendentes:</span>
-                                        <strong class="text-warning"><?php echo $dados_relatorio['estatisticas']['eventos_pendentes']; ?></strong>
-                                    </div>
-                                    <div class="stat-row">
-                                        <span>Eventos Rejeitados:</span>
-                                        <strong class="text-danger"><?php echo $dados_relatorio['estatisticas']['eventos_rejeitados']; ?></strong>
-                                    </div>
+                            <div class="bg-white p-3 rounded border-start border-primary border-4 h-100">
+                                <h6 class="text-primary mb-3">📅 Estatísticas Gerais</h6>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span>Total de Eventos:</span>
+                                    <strong><?php echo $dados_relatorio['estatisticas']['total_eventos']; ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span>Eventos Aprovados:</span>
+                                    <strong class="text-success"><?php echo $dados_relatorio['estatisticas']['eventos_aprovados']; ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span>Eventos Pendentes:</span>
+                                    <strong class="text-warning"><?php echo $dados_relatorio['estatisticas']['eventos_pendentes']; ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2">
+                                    <span>Eventos Rejeitados:</span>
+                                    <strong class="text-danger"><?php echo $dados_relatorio['estatisticas']['eventos_rejeitados']; ?></strong>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="summary-card bg-success">
-                                <h6>🏃‍♂️ Por Tipo de Evento</h6>
-                                <div class="summary-stats">
-                                    <div class="stat-row">
-                                        <span>Eventos Esportivos:</span>
-                                        <strong><?php echo $dados_relatorio['estatisticas']['eventos_esportivos']; ?></strong>
-                                    </div>
-                                    <div class="stat-row">
-                                        <span>Eventos Não Esportivos:</span>
-                                        <strong><?php echo $dados_relatorio['estatisticas']['eventos_nao_esportivos']; ?></strong>
-                                    </div>
-                                    <div class="stat-row">
-                                        <span>Com Atlética Confirmada:</span>
-                                        <strong class="text-info"><?php echo $dados_relatorio['estatisticas']['eventos_com_atletica']; ?></strong>
-                                    </div>
+                            <div class="bg-white p-3 rounded border-start border-success border-4 h-100">
+                                <h6 class="text-success mb-3">🏃‍♂️ Por Tipo de Evento</h6>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span>Eventos Esportivos:</span>
+                                    <strong><?php echo $dados_relatorio['estatisticas']['eventos_esportivos']; ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span>Eventos Não Esportivos:</span>
+                                    <strong><?php echo $dados_relatorio['estatisticas']['eventos_nao_esportivos']; ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2">
+                                    <span>Com Atlética Confirmada:</span>
+                                    <strong class="text-info"><?php echo $dados_relatorio['estatisticas']['eventos_com_atletica']; ?></strong>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="summary-card bg-info">
-                                <h6>👥 Participação Total</h6>
-                                <div class="summary-stats">
-                                    <div class="stat-row">
-                                        <span>Pessoas Estimadas:</span>
-                                        <strong><?php echo $dados_relatorio['estatisticas']['total_pessoas_estimadas'] ?: '0'; ?></strong>
-                                    </div>
-                                    <div class="stat-row">
-                                        <span>Pessoas das Atléticas:</span>
-                                        <strong><?php echo $dados_relatorio['estatisticas']['total_pessoas_atleticas'] ?: '0'; ?></strong>
-                                    </div>
-                                    <div class="stat-row">
-                                        <span>Período Analisado:</span>
-                                        <strong><?php echo floor((strtotime($dados_relatorio['periodo']['fim']) - strtotime($dados_relatorio['periodo']['inicio'])) / 86400) + 1; ?> dias</strong>
-                                    </div>
+                            <div class="bg-white p-3 rounded border-start border-info border-4 h-100">
+                                <h6 class="text-info mb-3">👥 Participação Total</h6>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span>Pessoas Estimadas:</span>
+                                    <strong><?php echo $dados_relatorio['estatisticas']['total_pessoas_estimadas'] ?: '0'; ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span>Pessoas das Atléticas:</span>
+                                    <strong><?php echo $dados_relatorio['estatisticas']['total_pessoas_atleticas'] ?: '0'; ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2">
+                                    <span>Período Analisado:</span>
+                                    <strong><?php echo floor((strtotime($dados_relatorio['periodo']['fim']) - strtotime($dados_relatorio['periodo']['inicio'])) / 86400) + 1; ?> dias</strong>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row g-4">
                     <?php if ($dados_relatorio['modalidades']->num_rows > 0): ?>
                     <div class="col-md-6">
-                        <div class="data-section">
-                            <h6 class="section-title">🏆 Eventos por Modalidade</h6>
+                        <div class="bg-light p-4 rounded">
+                            <h6 class="text-primary border-bottom border-primary pb-2 mb-3">🏆 Eventos por Modalidade</h6>
                             <div class="table-responsive">
-                                <table class="table table-sm table-striped">
+                                <table class="table table-sm table-striped mb-0">
                                     <thead class="table-dark">
                                         <tr>
                                             <th>Modalidade</th>
@@ -458,10 +458,10 @@ $eventos_select = $conexao->query($sql_eventos_select);
 
                     <?php if ($dados_relatorio['atleticas']->num_rows > 0): ?>
                     <div class="col-md-6">
-                        <div class="data-section">
-                            <h6 class="section-title">🏫 Participação por Atlética</h6>
+                        <div class="bg-light p-4 rounded">
+                            <h6 class="text-primary border-bottom border-primary pb-2 mb-3">🏫 Participação por Atlética</h6>
                             <div class="table-responsive">
-                                <table class="table table-sm table-striped">
+                                <table class="table table-sm table-striped mb-0">
                                     <thead class="table-dark">
                                         <tr>
                                             <th>Atlética</th>
@@ -483,45 +483,66 @@ $eventos_select = $conexao->query($sql_eventos_select);
                     <?php endif; ?>
                 </div>
 
-                <div class="events-list-section mt-4">
-                    <h6 class="section-title">📋 Lista Completa de Eventos</h6>
+                <div class="bg-light p-4 rounded mt-4">
+                    <h6 class="text-primary border-bottom border-primary pb-2 mb-3">📋 Lista Completa de Eventos</h6>
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover table-sm mb-0">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>Data</th>
+                                    <th class="text-nowrap">Data</th>
                                     <th>Título</th>
-                                    <th>Tipo</th>
-                                    <th>Status</th>
-                                    <th>Responsável</th>
-                                    <th class="text-center">Pessoas</th>
+                                    <th class="text-center d-none d-md-table-cell">Tipo</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="d-none d-lg-table-cell">Responsável</th>
+                                    <th class="text-center d-none d-sm-table-cell">Pessoas</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php while($evento = $dados_relatorio['eventos']->fetch_assoc()): ?>
                                     <tr>
-                                        <td><?php echo date('d/m/Y', strtotime($evento['data_agendamento'])); ?></td>
-                                        <td><?php echo htmlspecialchars($evento['titulo']); ?></td>
+                                        <td class="text-nowrap small"><?php echo date('d/m/Y', strtotime($evento['data_agendamento'])); ?></td>
                                         <td>
+                                            <div class="fw-bold"><?php echo htmlspecialchars($evento['titulo']); ?></div>
+                                            <div class="d-md-none">
+                                                <small class="text-muted">
+                                                    <span class="badge bg-<?php echo $evento['tipo_agendamento'] == 'esportivo' ? 'primary' : 'secondary'; ?> me-1">
+                                                        <?php echo ucfirst(str_replace('_', ' ', $evento['tipo_agendamento'])); ?>
+                                                    </span>
+                                                    <span class="d-lg-none"><?php echo htmlspecialchars($evento['responsavel']); ?></span>
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td class="text-center d-none d-md-table-cell">
                                             <span class="badge bg-<?php echo $evento['tipo_agendamento'] == 'esportivo' ? 'primary' : 'secondary'; ?>">
                                                 <?php echo ucfirst(str_replace('_', ' ', $evento['tipo_agendamento'])); ?>
                                             </span>
                                         </td>
-                                        <td>
-                                            <span class="badge bg-<?php echo $evento['status'] == 'aprovado' ? 'success' : ($evento['status'] == 'pendente' ? 'warning' : 'danger'); ?>">
+                                        <td class="text-center">
+                                            <span class="badge bg-<?php echo $evento['status'] == 'aprovado' ? 'success' : ($evento['status'] == 'pendente' ? 'warning text-dark' : 'danger'); ?>">
                                                 <?php echo ucfirst($evento['status']); ?>
                                             </span>
                                         </td>
-                                        <td><?php echo htmlspecialchars($evento['responsavel']); ?></td>
-                                        <td class="text-center"><?php echo $evento['quantidade_pessoas'] ?: '-'; ?></td>
+                                        <td class="d-none d-lg-table-cell">
+                                            <small><?php echo htmlspecialchars($evento['responsavel']); ?></small>
+                                        </td>
+                                        <td class="text-center d-none d-sm-table-cell">
+                                            <span class="badge bg-info"><?php echo $evento['quantidade_pessoas'] ?: '0'; ?></span>
+                                        </td>
                                     </tr>
                                 <?php endwhile; ?>
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Nota informativa para dispositivos móveis -->
+                    <div class="d-md-none mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle"></i> Em dispositivos móveis, informações adicionais são exibidas abaixo do título.
+                        </small>
+                    </div>
                 </div>
 
-                <div class="report-footer mt-4 pt-3 border-top">
+                <div class="bg-light p-3 rounded mt-4 border-top border-2">
                     <div class="row">
                         <div class="col-md-4">
                             <small class="text-muted">
@@ -547,6 +568,7 @@ $eventos_select = $conexao->query($sql_eventos_select);
 </div>
 
 <style>
+/* Apenas estilos essenciais que o Bootstrap não cobre */
 .report-page {
     max-width: 1200px;
     margin: 0 auto;
@@ -555,140 +577,11 @@ $eventos_select = $conexao->query($sql_eventos_select);
 .page-header {
     background: linear-gradient(135deg, #007bff, #0056b3);
     color: white;
-    padding: 2rem;
-    border-radius: 0.5rem;
-    margin-bottom: 2rem;
-}
-
-.info-section, .stats-section, .data-section {
-    background: #f8f9fa;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    height: 100%;
-}
-
-.section-title {
-    color: #495057;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #007bff;
-}
-
-.info-grid .info-item {
-    margin-bottom: 0.75rem;
-    padding: 0.5rem;
-    background: white;
-    border-radius: 0.25rem;
-    border-left: 3px solid #007bff;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-}
-
-.stat-card {
-    background: white;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    text-align: center;
-    border: 2px solid #e9ecef;
-    transition: transform 0.2s;
-}
-
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .stat-card.atletica-confirmed {
     border-color: #28a745;
     background: linear-gradient(135deg, #d4edda, #c3e6cb);
-}
-
-.stat-number {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #007bff;
-}
-
-.stat-label {
-    font-size: 0.875rem;
-    color: #6c757d;
-    margin-top: 0.25rem;
-}
-
-.stat-sublabel {
-    font-size: 0.75rem;
-    color: #28a745;
-    font-weight: bold;
-    margin-top: 0.25rem;
-}
-
-.executive-summary {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    padding: 2rem;
-    border-radius: 0.5rem;
-    border: 1px solid #dee2e6;
-}
-
-.summary-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    height: 100%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-left: 4px solid;
-}
-
-.summary-card.bg-primary {
-    border-left-color: #007bff;
-}
-
-.summary-card.bg-success {
-    border-left-color: #28a745;
-}
-
-.summary-card.bg-info {
-    border-left-color: #17a2b8;
-}
-
-.summary-card h6 {
-    color: #495057;
-    margin-bottom: 1rem;
-    font-weight: bold;
-}
-
-.summary-stats .stat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #f8f9fa;
-}
-
-.summary-stats .stat-row:last-child {
-    border-bottom: none;
-}
-
-.participants-section, .events-list-section {
-    background: #f8f9fa;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-}
-
-.no-data-section {
-    background: #f8f9fa;
-    padding: 2rem;
-    border-radius: 0.5rem;
-}
-
-.report-footer {
-    background: #f8f9fa;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    margin-top: 2rem;
 }
 
 /* Estilos para impressão */
@@ -709,11 +602,7 @@ $eventos_select = $conexao->query($sql_eventos_select);
         print-color-adjust: exact;
     }
 
-    .summary-card {
-        page-break-inside: avoid;
-    }
-
-    .table {
+    .summary-card, .table {
         page-break-inside: avoid;
     }
 
@@ -723,24 +612,6 @@ $eventos_select = $conexao->query($sql_eventos_select);
 
     body {
         font-size: 12px;
-    }
-
-    .section-title {
-        color: #333 !important;
-    }
-}
-
-@media (max-width: 768px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .executive-summary .row {
-        flex-direction: column;
-    }
-
-    .summary-card {
-        margin-bottom: 1rem;
     }
 }
 </style>

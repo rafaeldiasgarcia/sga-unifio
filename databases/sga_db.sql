@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 15/09/2025 às 02:58
+-- Tempo de geração: 16/09/2025 às 08:03
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -38,7 +38,11 @@ CREATE TABLE `agendamentos` (
   `descricao` text DEFAULT NULL,
   `status` enum('aprovado','pendente','rejeitado') NOT NULL DEFAULT 'pendente',
   `motivo_rejeicao` text DEFAULT NULL,
-  `data_solicitacao` timestamp NOT NULL DEFAULT current_timestamp()
+  `data_solicitacao` timestamp NOT NULL DEFAULT current_timestamp(),
+  `atletica_confirmada` tinyint(1) NOT NULL DEFAULT 0,
+  `atletica_id_confirmada` int(11) DEFAULT NULL,
+  `quantidade_atletica` int(11) DEFAULT 0,
+  `quantidade_pessoas` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -54,17 +58,6 @@ CREATE TABLE `atleticas` (
   `logo_url` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Despejando dados para a tabela `atleticas`
---
-
-INSERT INTO `atleticas` (`id`, `nome`, `descricao`, `logo_url`) VALUES
-(1, 'Atlética Engenharia', 'Atlética dos cursos de engenharia.', NULL),
-(2, 'Atlética Medicina', 'Atlética da faculdade de medicina.', NULL),
-(3, 'Atlética Direito', 'Atlética da faculdade de direito.', NULL),
-(4, 'Atlética Educação Física', 'Atlética dos esportes.', NULL),
-(5, 'Atlética Computação', 'Atlética dos cursos de tecnologia.', NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -77,17 +70,6 @@ CREATE TABLE `cursos` (
   `atletica_id` int(11) DEFAULT NULL,
   `coordenador_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Despejando dados para a tabela `cursos`
---
-
-INSERT INTO `cursos` (`id`, `nome`, `atletica_id`, `coordenador_id`) VALUES
-(1, 'Engenharia Civil', 1, NULL),
-(2, 'Medicina', 2, NULL),
-(3, 'Direito', 3, NULL),
-(4, 'Educação Física', 4, NULL),
-(5, 'Ciência da Computação', 5, NULL);
 
 -- --------------------------------------------------------
 
@@ -209,17 +191,6 @@ CREATE TABLE `professores_cursos` (
   `curso_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Despejando dados para a tabela `professores_cursos`
---
-
-INSERT INTO `professores_cursos` (`id`, `professor_id`, `curso_id`) VALUES
-(1, 1, 1),
-(2, 1, 2),
-(3, 1, 3),
-(4, 1, 4),
-(5, 1, 5);
-
 -- --------------------------------------------------------
 
 --
@@ -250,10 +221,7 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `ra`, `data_nascimento`, `curso_id`, `role`, `atletica_id`, `tipo_usuario_detalhado`, `is_coordenador`, `atletica_join_status`, `login_code`, `login_code_expires`, `reset_token`, `reset_token_expires`) VALUES
-(1, 'Super Admin', 'super@admin.com', '$2y$10$d8SoY8sdOkYci2Q/de.uye4c6j7Cu.CUYVxEm55Lk43l4Am7KBbqi', NULL, NULL, NULL, 'superadmin', NULL, NULL, 0, 'none', NULL, NULL, NULL, NULL),
-(18, 'Aluno 1', '000001@unifio.edu.br', '$2y$10$6cs6ooawxL4xgeGSHIwq.OTpTVjD2oaHakcainfTLYYaCT2HtJizG', '000001', '0001-01-01', 5, 'usuario', 5, 'Aluno', 0, 'none', NULL, NULL, NULL, NULL),
-(19, 'Aluno 2', '000002@unifio.edu.br', '$2y$10$DayNPVwIV.2.MjxmTP1iDORCGZQOFDZanCS6cT/OEecAZxFUDS3lK', '000002', '0001-01-01', 5, 'usuario', 5, 'Membro das Atléticas', 0, 'none', NULL, NULL, NULL, NULL),
-(20, 'Aluno 3 (admin atletica)', '000003@unifio.edu.br', '$2y$10$eFneoL4tFTXl..wAKKoLWuD4uwAjUQS.6ncU5oVfZRC7.ZXnilyju', '000003', '0001-01-01', 5, 'admin', 5, 'Membro das Atléticas', 0, 'aprovado', NULL, NULL, NULL, NULL);
+(1, 'Super Admin', 'super@admin.com', '$2y$10$d8SoY8sdOkYci2Q/de.uye4c6j7Cu.CUYVxEm55Lk43l4Am7KBbqi', NULL, NULL, NULL, 'superadmin', NULL, NULL, 0, 'none', NULL, NULL, NULL, NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -264,7 +232,8 @@ INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `ra`, `data_nascimento`,
 --
 ALTER TABLE `agendamentos`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `usuario_id` (`usuario_id`);
+  ADD KEY `usuario_id` (`usuario_id`),
+  ADD KEY `atletica_id_confirmada` (`atletica_id_confirmada`);
 
 --
 -- Índices de tabela `atleticas`
@@ -361,37 +330,37 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de tabela `agendamentos`
 --
 ALTER TABLE `agendamentos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `atleticas`
 --
 ALTER TABLE `atleticas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de tabela `cursos`
 --
 ALTER TABLE `cursos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de tabela `equipes`
 --
 ALTER TABLE `equipes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `equipe_membros`
 --
 ALTER TABLE `equipe_membros`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `eventos`
 --
 ALTER TABLE `eventos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `inscricoes_eventos`
@@ -403,7 +372,7 @@ ALTER TABLE `inscricoes_eventos`
 -- AUTO_INCREMENT de tabela `inscricoes_modalidade`
 --
 ALTER TABLE `inscricoes_modalidade`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `modalidades`
@@ -415,19 +384,19 @@ ALTER TABLE `modalidades`
 -- AUTO_INCREMENT de tabela `presencas`
 --
 ALTER TABLE `presencas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `professores_cursos`
 --
 ALTER TABLE `professores_cursos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Restrições para tabelas despejadas
@@ -437,7 +406,8 @@ ALTER TABLE `usuarios`
 -- Restrições para tabelas `agendamentos`
 --
 ALTER TABLE `agendamentos`
-  ADD CONSTRAINT `agendamentos_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `agendamentos_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `agendamentos_ibfk_2` FOREIGN KEY (`atletica_id_confirmada`) REFERENCES `atleticas` (`id`) ON DELETE SET NULL;
 
 --
 -- Restrições para tabelas `cursos`

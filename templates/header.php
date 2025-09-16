@@ -50,6 +50,29 @@
                         <li class="nav-item"><a class="nav-link" href="/sga/public/usuario/ver_atletica.php">Ver Atlética</a></li>
                     <?php endif; ?>
 
+                    <!-- Ícone de Notificações -->
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown" id="notificationDropdown">
+                            <i class="bi bi-bell fs-5"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationBadge" style="display: none;">
+                                0
+                            </span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end notification-dropdown" style="width: 350px; max-height: 400px; overflow-y: auto;">
+                            <h6 class="dropdown-header d-flex justify-content-between align-items-center">
+                                <span>Notificações</span>
+                                <button class="btn btn-sm btn-outline-secondary" id="markAllRead" style="font-size: 0.75rem;">
+                                    Marcar todas como lidas
+                                </button>
+                            </h6>
+                            <div id="notificationsList">
+                                <div class="dropdown-item text-muted text-center">
+                                    <i class="bi bi-bell-slash"></i> Nenhuma notificação
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i> Olá, <?php echo htmlspecialchars($_SESSION["nome"]); ?>
